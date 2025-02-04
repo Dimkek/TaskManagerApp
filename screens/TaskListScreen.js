@@ -1,36 +1,52 @@
-import React, { useState } from 'react';
-import { View, Text, Button, FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useContext } from 'react';
+import { View, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { TasksContext } from '../context/TasksContext';
+import TaskItem from '../components/TaskItem';
+import { MaterialIcons } from '@expo/vector-icons';
 
-const TaskListScreen = () => {
-  const [tasks, setTasks] = useState([]);
-  const navigation = useNavigation();
+export default function TaskListScreen({ navigation }) {
+  const { tasks, toggleComplete, deleteTask } = useContext(TasksContext);
 
-  const addTask = (task) => {
-    setTasks((prevTasks) => [...prevTasks, task]);
+  // Сортування завдань: невиконані зверху, виконані знизу
+  const sortedTasks = [...tasks].sort((a, b) => a.completed - b.completed);
+
+  const handleAddTask = () => {
+    navigation.navigate('AddNote'); // Навігація до екрану додавання нотаток
   };
 
-  const renderTaskItem = ({ item }) => (
-    <View style={{ padding: 10, borderBottomWidth: 1, borderBottomColor: '#ccc' }}>
-      <Text style={{ fontWeight: 'bold' }}>{item.title}</Text>
-      <Text>{item.description}</Text>
-      {item.date && <Text>Дата: {item.date}</Text>}
-    </View>
-  );
-
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Button
-        title="Новая заметка"
-        onPress={() => navigation.navigate('AddNote', { addTask })}
-      />
+    <View style={styles.container}>
       <FlatList
-        data={tasks}
-        renderItem={renderTaskItem}
-        keyExtractor={(item, index) => index.toString()}
+        data={sortedTasks}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <TaskItem task={item} onToggleComplete={toggleComplete} onDelete={deleteTask} />
+        )}
       />
+      <TouchableOpacity onPress={handleAddTask} style={styles.addButton}>
+        <MaterialIcons name="add" size={24} color="white" />
+      </TouchableOpacity>
     </View>
   );
-};
+}
 
-export default TaskListScreen;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
+    backgroundColor: '#007BFF',
+    padding: 15,
+    borderRadius: 50,
+    elevation: 5, // Тінь для Android
+    shadowColor: '#000', // Тінь для iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+  },
+});
