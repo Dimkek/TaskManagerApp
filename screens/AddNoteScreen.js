@@ -1,29 +1,35 @@
 import React, { useState, useContext } from 'react';
-import { View, TextInput, Button, TouchableOpacity, Text } from 'react-native';
+import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { TasksContext } from '../context/TasksContext';
 
 const AddNoteScreen = () => {
+  const { addTask } = useContext(TasksContext);
+  const { t } = useTranslation();
+  const navigation = useNavigation();
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const navigation = useNavigation();
-  const { addTask } = useContext(TasksContext);
+  const [category, setCategory] = useState('work'); // Категорія за замовчуванням
 
   const handleAddNote = () => {
     const formattedDate = date.toISOString().split('T')[0];
     const formattedTime = time.toTimeString().split(':').slice(0, 2).join(':');
-    const newTask = { 
+
+    const newTask = {
       id: Date.now(),
-      title, 
-      description, 
-      date: formattedDate, 
+      title,
+      description,
+      date: formattedDate,
       time: formattedTime,
-      completed: false // Додаємо поле для стану виконання
+      category,
     };
 
     addTask(newTask);
@@ -31,28 +37,41 @@ const AddNoteScreen = () => {
   };
 
   return (
-    <View style={{ padding: 20 }}>
+    <View style={styles.container}>
       <TextInput
-        placeholder="Заголовок"
+        placeholder={t('titlePlaceholder')}
         value={title}
         onChangeText={setTitle}
-        style={{ marginBottom: 20, borderBottomWidth: 1, borderBottomColor: '#ccc' }}
+        style={styles.input}
       />
       <TextInput
-        placeholder="Опис"
+        placeholder={t('descriptionPlaceholder')}
         value={description}
         onChangeText={setDescription}
-        multiline={true} // Дозволяє вводити декілька рядків
+        multiline={true}
         numberOfLines={4}
-        style={{
-          marginBottom: 20,
-          borderBottomWidth: 1,
-          borderBottomColor: '#ccc',
-          textAlignVertical: 'top',
-        }}
+        style={[styles.input, styles.textArea]}
       />
-      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={{ marginBottom: 20 }}>
-        <Text style={{ fontSize: 16 }}>Обрана дата: {date.toDateString()}</Text>
+
+      {/* Вибір категорії */}
+      <Text style={styles.label}>{t('selectCategory')}:</Text>
+      <Picker
+        selectedValue={category}
+        onValueChange={(itemValue) => setCategory(itemValue)}
+        style={styles.picker}
+      >
+        <Picker.Item label={t('category.work')} value="work" />
+        <Picker.Item label={t('category.shopping')} value="shopping" />
+        <Picker.Item label={t('category.home')} value="home" />
+        <Picker.Item label={t('category.projects')} value="projects" />
+        <Picker.Item label={t('category.other')} value="other" />
+      </Picker>
+
+      {/* Вибір дати */}
+      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateTimeButton}>
+        <Text style={styles.dateTimeText}>
+          {t('selectedDate')}: {date.toDateString()}
+        </Text>
       </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker
@@ -67,8 +86,12 @@ const AddNoteScreen = () => {
           }}
         />
       )}
-      <TouchableOpacity onPress={() => setShowTimePicker(true)} style={{ marginBottom: 20 }}>
-        <Text style={{ fontSize: 16 }}>Обраний час: {time.toTimeString().split(':').slice(0, 2).join(':')}</Text>
+
+      {/* Вибір часу */}
+      <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.dateTimeButton}>
+        <Text style={styles.dateTimeText}>
+          {t('selectedTime')}: {time.toTimeString().split(':').slice(0, 2).join(':')}
+        </Text>
       </TouchableOpacity>
       {showTimePicker && (
         <DateTimePicker
@@ -83,9 +106,36 @@ const AddNoteScreen = () => {
           }}
         />
       )}
-      <Button title="Додати нотатку" onPress={handleAddNote} />
+
+      <Button title={t('addNote')} onPress={handleAddNote} />
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  input: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 20,
+    padding: 10,
+    fontSize: 16,
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
+  picker: {
+    marginVertical: 10,
+  },
+});
 
 export default AddNoteScreen;

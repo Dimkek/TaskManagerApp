@@ -1,4 +1,11 @@
 {
+    "selectCategory": "Select Category",
+    "category": {
+    "work": "Work",
+    "shopping": "Shopping",
+    "home": "Home",
+    "projects": "Projects",
+    "other": "Other"},
     "welcome": "Welcome",
     "settings": "Settings",
     "selectLanguage": "Select Language",
