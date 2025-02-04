@@ -35,8 +35,14 @@ export const TasksProvider = ({ children }) => {
     saveTasks(newTasks);
   };
 
+  const removeTask = (taskId) => {
+    const updatedTasks = tasks.filter((task) => task.id !== taskId);
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
+  };
+
   return (
-    <TasksContext.Provider value={{ tasks, addTask }}>
+    <TasksContext.Provider value={{ tasks, addTask, removeTask }}>
       {children}
     </TasksContext.Provider>
   );
