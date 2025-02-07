@@ -4,11 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { Picker } from '@react-native-picker/picker';
 import { TasksContext } from '../context/TasksContext';
 
+const categoryColors = {
+  work: '#A7C7E7', // Пастельно-синій
+  shopping: '#B5EAD7', // Пастельно-зелений
+  home: '#FFDAC1', // Пастельно-оранжевий
+  projects: '#CBAACB', // Пастельно-фіолетовий
+  other: '#E0E0E0', // Пастельно-сірий
+};
+
 const TaskListScreen = ({ navigation }) => {
   const { t } = useTranslation();
   const { tasks, removeTask } = useContext(TasksContext);
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [expandedTasks, setExpandedTasks] = useState({}); // Стан для відображення опису
+  const [selectedCategory, setSelectedCategory] = useState('all'); 
 
   const confirmDelete = (taskId) => {
     Alert.alert(
@@ -21,31 +28,22 @@ const TaskListScreen = ({ navigation }) => {
     );
   };
 
-  const toggleExpand = (taskId) => {
-    setExpandedTasks((prev) => ({
-      ...prev,
-      [taskId]: !prev[taskId], // Перемикаємо стан відображення опису
-    }));
-  };
-
-  const filteredTasks = selectedCategory === 'all'
-    ? tasks
+  const filteredTasks = selectedCategory === 'all' 
+    ? tasks 
     : tasks.filter(task => task.category === selectedCategory);
 
   const renderTask = ({ item }) => (
-    <TouchableOpacity onPress={() => toggleExpand(item.id)} style={styles.taskItem}>
+    <View style={styles.taskItem}>
       <View style={styles.taskContent}>
-        <Text style={styles.taskTitle}>
-          {item.title} <Text style={styles.taskCategory}>{item.category ? `(${t(`category.${item.category}`)})` : ''}</Text>
+        <Text style={styles.taskTitle}>{item.title}</Text>
+        <Text style={[styles.taskCategory, { color: categoryColors[item.category] }]}>
+          ({t(`category.${item.category}`)})
         </Text>
-        {expandedTasks[item.id] && (
-          <Text style={styles.taskDescription}>{item.description}</Text>
-        )}
       </View>
       <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item.id)}>
         <Text style={styles.deleteText}>x</Text>
       </TouchableOpacity>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -103,22 +101,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 10,
-    borderBottomWidth: 0, // Видаляємо зайву лінію
   },
   taskContent: {
-    flex: 1,
+    flex: 1, 
   },
   taskTitle: {
     fontSize: 16,
+    fontWeight: 'bold',
   },
   taskCategory: {
     fontSize: 14,
-    color: 'gray', // Сірий колір для категорії
-  },
-  taskDescription: {
-    fontSize: 14,
-    color: 'black',
-    marginTop: 5, // Додаємо відступ для зручності
+    fontWeight: 'bold',
   },
   deleteButton: {
     padding: 5,
