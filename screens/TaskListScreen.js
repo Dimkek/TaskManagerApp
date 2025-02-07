@@ -7,7 +7,8 @@ import { TasksContext } from '../context/TasksContext';
 const TaskListScreen = ({ navigation }) => {
   const { t } = useTranslation();
   const { tasks, removeTask } = useContext(TasksContext);
-  const [selectedCategory, setSelectedCategory] = useState('all'); 
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [expandedTasks, setExpandedTasks] = useState({}); // Стан для відображення опису
 
   const confirmDelete = (taskId) => {
     Alert.alert(
@@ -20,20 +21,31 @@ const TaskListScreen = ({ navigation }) => {
     );
   };
 
-  const filteredTasks = selectedCategory === 'all' 
-    ? tasks 
+  const toggleExpand = (taskId) => {
+    setExpandedTasks((prev) => ({
+      ...prev,
+      [taskId]: !prev[taskId], // Перемикаємо стан відображення опису
+    }));
+  };
+
+  const filteredTasks = selectedCategory === 'all'
+    ? tasks
     : tasks.filter(task => task.category === selectedCategory);
 
   const renderTask = ({ item }) => (
-    <View style={styles.taskItem}>
+    <TouchableOpacity onPress={() => toggleExpand(item.id)} style={styles.taskItem}>
       <View style={styles.taskContent}>
-        <Text style={styles.taskTitle}>{item.title}</Text>
-        <Text style={styles.taskCategory}>{t(`category.${item.category}`)}</Text>
+        <Text style={styles.taskTitle}>
+          {item.title} <Text style={styles.taskCategory}>{item.category ? `(${t(`category.${item.category}`)})` : ''}</Text>
+        </Text>
+        {expandedTasks[item.id] && (
+          <Text style={styles.taskDescription}>{item.description}</Text>
+        )}
       </View>
       <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item.id)}>
         <Text style={styles.deleteText}>x</Text>
       </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -91,20 +103,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomWidth: 0, // Видаляємо зайву лінію
   },
   taskContent: {
-    flex: 1, 
+    flex: 1,
   },
   taskTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
   },
   taskCategory: {
     fontSize: 14,
-    color: 'gray',
-    fontStyle: 'italic',
+    color: 'gray', // Сірий колір для категорії
+  },
+  taskDescription: {
+    fontSize: 14,
+    color: 'black',
+    marginTop: 5, // Додаємо відступ для зручності
   },
   deleteButton: {
     padding: 5,

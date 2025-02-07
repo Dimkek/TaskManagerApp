@@ -8,38 +8,38 @@ import { createStackNavigator } from '@react-navigation/stack';
 import AddNoteScreen from './screens/AddNoteScreen';
 import EditNoteScreen from './screens/EditNoteScreen';
 import { TasksProvider } from './context/TasksContext';
-import './i18n'; // Подключаем i18n
+import './i18n'; // Підключення i18n для локалізації
 import { useTranslation } from 'react-i18next';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 
 function MainNavigator() {
-  const { t } = useTranslation(); // Используем перевод
+  const { t } = useTranslation(); // Використання перекладу
 
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="TaskListMain"
+        name="TaskList"
         component={TaskListScreen}
-        options={{ title: t('TaskListMain') }} // Пример использования перевода
+        options={{ title: t('taskList') }} // Використання коректного ключа перекладу
       />
       <Stack.Screen
         name="AddNote"
         component={AddNoteScreen}
-        options={{ title: t('AddNote') }} // Пример использования перевода
+        options={{ title: t('addNote') }}
       />
       <Stack.Screen
         name="EditNote"
         component={EditNoteScreen}
-        options={{ title: t('EditNote') }} // Пример использования перевода
+        options={{ title: t('editNote') }}
       />
     </Stack.Navigator>
   );
 }
 
 export default function App() {
-  const { t } = useTranslation(); // Используем перевод
+  const { t } = useTranslation(); // Використання перекладу
 
   return (
     <TasksProvider>
@@ -48,17 +48,17 @@ export default function App() {
           <Drawer.Screen
             name="TaskListDrawer"
             component={MainNavigator}
-            options={{ title: t('TaskListDrawer') }} // Пример использования перевода
+            options={{ title: t('TaskListDrawer') }}
           />
           <Drawer.Screen
             name="Calendar"
             component={CalendarScreen}
-            options={{ title: t('Calendar') }} // Пример использования перевода
+            options={{ title: t('Calendar') }}
           />
           <Drawer.Screen
             name="Settings"
             component={SettingsScreen}
-            options={{ title: t('Settings') }} // Пример использования перевода
+            options={{ title: t('settings') }}
           />
         </Drawer.Navigator>
       </NavigationContainer>
