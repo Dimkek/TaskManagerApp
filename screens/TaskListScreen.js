@@ -48,19 +48,22 @@ const TaskListScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{t('filterBy')}:</Text>
-      <Picker
-        selectedValue={selectedCategory}
-        onValueChange={(itemValue) => setSelectedCategory(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label={t('allTasks')} value="all" />
-        <Picker.Item label={t('category.work')} value="work" />
-        <Picker.Item label={t('category.shopping')} value="shopping" />
-        <Picker.Item label={t('category.home')} value="home" />
-        <Picker.Item label={t('category.projects')} value="projects" />
-        <Picker.Item label={t('category.other')} value="other" />
-      </Picker>
+      {/* Рядок фільтрації з розташуванням Picker поруч */}
+      <View style={styles.filterRow}>
+        <Text style={styles.label}>{t('filterBy')}:</Text>
+        <Picker
+          selectedValue={selectedCategory}
+          onValueChange={(itemValue) => setSelectedCategory(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label={t('allTasks')} value="all" />
+          <Picker.Item label={t('category.work')} value="work" />
+          <Picker.Item label={t('category.shopping')} value="shopping" />
+          <Picker.Item label={t('category.home')} value="home" />
+          <Picker.Item label={t('category.projects')} value="projects" />
+          <Picker.Item label={t('category.other')} value="other" />
+        </Picker>
+      </View>
 
       {filteredTasks.length > 0 ? (
         <FlatList
@@ -88,13 +91,18 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#fff',
   },
+  filterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between', // Розташування filterBy та Picker в один рядок
+    marginBottom: 10,
+  },
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
   },
   picker: {
-    marginBottom: 20,
+    width: 150, // Визначаємо ширину Picker
   },
   taskItem: {
     flexDirection: 'row',
