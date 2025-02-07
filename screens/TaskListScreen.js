@@ -29,6 +29,10 @@ const TaskListScreen = ({ navigation }) => {
     );
   };
 
+  const editTask = (task) => {
+    navigation.navigate('AddNote', { task });
+  };
+
   const toggleExpand = (taskId) => {
     setExpandedTasks((prev) => ({
       ...prev,
@@ -40,10 +44,17 @@ const TaskListScreen = ({ navigation }) => {
     ? tasks 
     : tasks.filter(task => task.category === selectedCategory);
 
-  const renderTask = ({ item }) => (
-    <TouchableOpacity onPress={() => toggleExpand(item.id)}>
+  const renderTask = ({ item }) => {
+    if (!item) return null; // Додаткова перевірка на наявність об'єкта item
+
+    return (
       <View style={styles.taskItem}>
-        <View style={styles.taskContent}>
+        <TouchableOpacity onPress={() => toggleExpand(item.id)}>
+          <Text style={styles.expandButton}>
+            {expandedTasks[item.id] ? '⌵' : '>'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.taskContent} onPress={() => editTask(item)}>
           <Text style={styles.taskTitle}>{item.title}</Text>
           {expandedTasks[item.id] && (
             <Text style={styles.taskDescription}>{item.description}</Text>
@@ -51,13 +62,13 @@ const TaskListScreen = ({ navigation }) => {
           <Text style={[styles.taskCategory, { color: categoryColors[item.category] }]}>
             ({t(`category.${item.category}`)})
           </Text>
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item.id)}>
           <Text style={styles.deleteText}>x</Text>
         </TouchableOpacity>
       </View>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -122,6 +133,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 10,
+  },
+  expandButton: {
+    fontSize: 18, // Зменшення розміру шрифту
+    paddingRight: 10,
   },
   taskContent: {
     flex: 1, 

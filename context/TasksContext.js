@@ -30,9 +30,15 @@ export const TasksProvider = ({ children }) => {
   };
 
   const addTask = (task) => {
-    const newTasks = [...tasks, task];
+    const newTasks = [...tasks, { ...task, id: tasks.length + 1 }];
     setTasks(newTasks);
     saveTasks(newTasks);
+  };
+
+  const updateTask = (updatedTask) => {
+    const updatedTasks = tasks.map(task => (task.id === updatedTask.id ? updatedTask : task));
+    setTasks(updatedTasks);
+    saveTasks(updatedTasks);
   };
 
   const removeTask = (taskId) => {
@@ -42,7 +48,7 @@ export const TasksProvider = ({ children }) => {
   };
 
   return (
-    <TasksContext.Provider value={{ tasks, addTask, removeTask }}>
+    <TasksContext.Provider value={{ tasks, addTask, updateTask, removeTask }}>
       {children}
     </TasksContext.Provider>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -6,10 +6,9 @@ import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { TasksContext } from '../context/TasksContext';
 
-const AddNoteScreen = () => {
-  const { addTask } = useContext(TasksContext);
+const AddNoteScreen = ({ route, navigation }) => {
+  const { addTask, updateTask } = useContext(TasksContext);
   const { t } = useTranslation();
-  const navigation = useNavigation();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -17,14 +16,25 @@ const AddNoteScreen = () => {
   const [time, setTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
-  const [category, setCategory] = useState('work'); // Категорія за замовчуванням
+  const [category, setCategory] = useState('other');
+  const [taskId, setTaskId] = useState(null);
 
-  const handleAddNote = () => {
+  useEffect(() => {
+    if (route.params?.task) {
+      const { task } = route.params;
+      setTitle(task.title);
+      setDescription(task.description);
+      setCategory(task.category);
+      setTaskId(task.id);
+    }
+  }, [route.params?.task]);
+
+  const saveNote = () => {
     const formattedDate = date.toISOString().split('T')[0];
     const formattedTime = time.toTimeString().split(':').slice(0, 2).join(':');
 
     const newTask = {
-      id: Date.now(),
+      id: taskId || Date.now(),
       title,
       description,
       date: formattedDate,
@@ -32,7 +42,11 @@ const AddNoteScreen = () => {
       category,
     };
 
-    addTask(newTask);
+    if (taskId) {
+      updateTask(newTask);
+    } else {
+      addTask(newTask);
+    }
     navigation.goBack();
   };
 
@@ -107,7 +121,7 @@ const AddNoteScreen = () => {
         />
       )}
 
-      <Button title={t('addNote')} onPress={handleAddNote} />
+      <Button title={t('addNote')} onPress={saveNote} />
     </View>
   );
 };
