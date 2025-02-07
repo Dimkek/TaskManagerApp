@@ -22,7 +22,7 @@ function MainNavigator() {
       <Stack.Screen
         name="TaskList"
         component={TaskListScreen}
-        options={{ title: t('taskList') }} // Використання коректного ключа перекладу
+        options={{ title: t('taskList'), headerShown: false }} // Приховування заголовка
       />
       <Stack.Screen
         name="AddNote"
