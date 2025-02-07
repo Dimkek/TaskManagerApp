@@ -15,7 +15,8 @@ const categoryColors = {
 const TaskListScreen = ({ navigation }) => {
   const { t } = useTranslation();
   const { tasks, removeTask } = useContext(TasksContext);
-  const [selectedCategory, setSelectedCategory] = useState('all'); 
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [expandedTasks, setExpandedTasks] = useState({}); // Стан для зберігання розгорнутих нотаток
 
   const confirmDelete = (taskId) => {
     Alert.alert(
@@ -28,22 +29,34 @@ const TaskListScreen = ({ navigation }) => {
     );
   };
 
+  const toggleExpand = (taskId) => {
+    setExpandedTasks((prev) => ({
+      ...prev,
+      [taskId]: !prev[taskId],
+    }));
+  };
+
   const filteredTasks = selectedCategory === 'all' 
     ? tasks 
     : tasks.filter(task => task.category === selectedCategory);
 
   const renderTask = ({ item }) => (
-    <View style={styles.taskItem}>
-      <View style={styles.taskContent}>
-        <Text style={styles.taskTitle}>{item.title}</Text>
-        <Text style={[styles.taskCategory, { color: categoryColors[item.category] }]}>
-          ({t(`category.${item.category}`)})
-        </Text>
+    <TouchableOpacity onPress={() => toggleExpand(item.id)}>
+      <View style={styles.taskItem}>
+        <View style={styles.taskContent}>
+          <Text style={styles.taskTitle}>{item.title}</Text>
+          {expandedTasks[item.id] && (
+            <Text style={styles.taskDescription}>{item.description}</Text>
+          )}
+          <Text style={[styles.taskCategory, { color: categoryColors[item.category] }]}>
+            ({t(`category.${item.category}`)})
+          </Text>
+        </View>
+        <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item.id)}>
+          <Text style={styles.deleteText}>x</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item.id)}>
-        <Text style={styles.deleteText}>x</Text>
-      </TouchableOpacity>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -116,6 +129,10 @@ const styles = StyleSheet.create({
   taskTitle: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  taskDescription: {
+    fontSize: 14,
+    color: 'gray',
   },
   taskCategory: {
     fontSize: 14,
