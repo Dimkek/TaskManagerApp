@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import TaskListScreen from './screens/TaskListScreen';
@@ -10,6 +10,7 @@ import EditNoteScreen from './screens/EditNoteScreen';
 import { TasksProvider } from './context/TasksContext';
 import './i18n'; // Підключення i18n для локалізації
 import { useTranslation } from 'react-i18next';
+import * as Notifications from 'expo-notifications';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
@@ -40,6 +41,17 @@ function MainNavigator() {
 
 export default function App() {
   const { t } = useTranslation(); // Використання перекладу
+
+  useEffect(() => {
+    const requestPermissions = async () => {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== 'granted') {
+        await Notifications.requestPermissionsAsync();
+      }
+    };
+
+    requestPermissions();
+  }, []);
 
   return (
     <TasksProvider>

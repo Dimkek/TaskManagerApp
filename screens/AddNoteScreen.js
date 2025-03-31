@@ -1,10 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TextInput, Button, TouchableOpacity, Text, StyleSheet, Switch, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { TasksContext } from '../context/TasksContext';
+import * as Notifications from 'expo-notifications';
 
 const AddNoteScreen = ({ route, navigation }) => {
   const { addTask, updateTask } = useContext(TasksContext);
@@ -18,6 +19,7 @@ const AddNoteScreen = ({ route, navigation }) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [category, setCategory] = useState('other');
   const [taskId, setTaskId] = useState(null);
+  const [enableNotification, setEnableNotification] = useState(false); // Перемикач для сповіщень
 
   useEffect(() => {
     if (route.params?.task) {
@@ -30,6 +32,11 @@ const AddNoteScreen = ({ route, navigation }) => {
   }, [route.params?.task]);
 
   const saveNote = () => {
+    if (!title.trim()) {
+      Alert.alert(t('error'), t('titleRequired'));
+      return;
+    }
+
     const formattedDate = date.toISOString().split('T')[0];
     const formattedTime = time.toTimeString().split(':').slice(0, 2).join(':');
 
@@ -46,9 +53,26 @@ const AddNoteScreen = ({ route, navigation }) => {
       updateTask(newTask);
     } else {
       addTask(newTask);
+      if (enableNotification) {
+        schedulePushNotification(title, date, time);
+      }
     }
     navigation.goBack();
   };
+
+  async function schedulePushNotification(title, date, time) {
+    const trigger = new Date(date);
+    trigger.setHours(time.getHours());
+    trigger.setMinutes(time.getMinutes());
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: t('reminderTitle'),
+        body: `${t('reminderBody')} ${title}`,
+      },
+      trigger,
+    });
+  }
 
   return (
     <View style={styles.container}>
@@ -121,6 +145,14 @@ const AddNoteScreen = ({ route, navigation }) => {
         />
       )}
 
+      <View style={styles.switchContainer}>
+        <Text>{t('enableNotification')}</Text>
+        <Switch
+          value={enableNotification}
+          onValueChange={setEnableNotification}
+        />
+      </View>
+
       <Button title={t('addNote')} onPress={saveNote} />
     </View>
   );
@@ -130,25 +162,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#fff',
   },
   input: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-    marginBottom: 20,
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
     padding: 10,
-    fontSize: 16,
   },
   textArea: {
-    height: 100,
-    textAlignVertical: 'top',
+    height: 80,
   },
   label: {
+    marginTop: 10,
     fontSize: 16,
     fontWeight: 'bold',
-    marginTop: 10,
   },
   picker: {
+    height: 50,
+    marginBottom: 20,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginVertical: 10,
+  },
+  dateTimeButton: {
+    marginVertical: 10,
+  },
+  dateTimeText: {
+    fontSize: 16,
   },
 });
 
