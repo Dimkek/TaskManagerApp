@@ -1,23 +1,25 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Picker } from '@react-native-picker/picker';
 import { TasksContext } from '../context/TasksContext';
 
 const categoryColors = {
-  work: '#A7C7E7', // Пастельно-синій
-  shopping: '#B5EAD7', // Пастельно-зелений
-  home: '#FFDAC1', // Пастельно-оранжевий
-  projects: '#CBAACB', // Пастельно-фіолетовий
-  other: '#E0E0E0', // Пастельно-сірий
+  work: '#A7C7E7',
+  shopping: '#B5EAD7',
+  home: '#FFDAC1',
+  projects: '#CBAACB',
+  other: '#E0E0E0',
 };
 
 const TaskListScreen = ({ navigation }) => {
   const { t } = useTranslation();
-  const { tasks, removeTask } = useContext(TasksContext);
+  // Додаємо updateTask для позначення виконаних завдань
+  const { tasks, removeTask, updateTask } = useContext(TasksContext);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [expandedTasks, setExpandedTasks] = useState({}); // Стан для зберігання розгорнутих нотаток
+  const [expandedTasks, setExpandedTasks] = useState({});
 
+  // Функція підтвердження видалення
   const confirmDelete = (taskId) => {
     Alert.alert(
       t('confirmDeleteTitle'),
@@ -29,23 +31,29 @@ const TaskListScreen = ({ navigation }) => {
     );
   };
 
+  // Перехід на екран редагування
   const editTask = (task) => {
     navigation.navigate('AddNote', { task });
   };
 
+  // Перемикання розгортання опису
   const toggleExpand = (taskId) => {
-    setExpandedTasks((prev) => ({
-      ...prev,
-      [taskId]: !prev[taskId],
-    }));
+    setExpandedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }));
   };
 
-  const filteredTasks = selectedCategory === 'all' 
-    ? tasks 
-    : tasks.filter(task => task.category === selectedCategory);
+  // Позначити задачу виконаною
+  const toggleComplete = (task) => {
+    updateTask({ ...task, completed: !task.completed });
+  };
+
+  // Фільтрація та сортування: спочатку невиконані, потім виконані
+  const filteredTasks = (selectedCategory === 'all'
+    ? tasks
+    : tasks.filter(task => task.category === selectedCategory)
+  ).slice().sort((a, b) => (b.completed ? 1 : 0) - (a.completed ? 1 : 0));
 
   const renderTask = ({ item }) => {
-    if (!item) return null; // Додаткова перевірка на наявність об'єкта item
+    if (!item) return null;
 
     return (
       <View style={styles.taskItem}>
@@ -54,16 +62,45 @@ const TaskListScreen = ({ navigation }) => {
             {expandedTasks[item.id] ? '⌵' : '>'}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.taskContent} onPress={() => editTask(item)}>
-          <Text style={styles.taskTitle}>{item.title}</Text>
+
+        <View style={styles.taskContent}>
+          <Text
+            style={[
+              styles.taskTitle,
+              item.completed && styles.taskTitleCompleted  // Якщо виконано, накреслити
+            ]}
+          >
+            {item.title}
+          </Text>
           {expandedTasks[item.id] && (
             <Text style={styles.taskDescription}>{item.description}</Text>
           )}
           <Text style={[styles.taskCategory, { color: categoryColors[item.category] }]}>
             ({t(`category.${item.category}`)})
           </Text>
+        </View>
+
+        {/* Кнопка позначити виконаною */}
+        <TouchableOpacity
+          style={styles.completeButton}
+          onPress={() => toggleComplete(item)}
+        >
+          <Text style={styles.completeText}>✔</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton} onPress={() => confirmDelete(item.id)}>
+
+        {/* Кнопка редагувати */}
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => editTask(item)}
+        >
+          <Text style={styles.editText}>✎</Text>
+        </TouchableOpacity>
+
+        {/* Кнопка видалити */}
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => confirmDelete(item.id)}
+        >
           <Text style={styles.deleteText}>x</Text>
         </TouchableOpacity>
       </View>
@@ -72,12 +109,11 @@ const TaskListScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Рядок фільтрації з розташуванням Picker поруч */}
       <View style={styles.filterRow}>
         <Text style={styles.label}>{t('filterBy')}:</Text>
         <Picker
           selectedValue={selectedCategory}
-          onValueChange={(itemValue) => setSelectedCategory(itemValue)}
+          onValueChange={setSelectedCategory}
           style={styles.picker}
         >
           <Picker.Item label={t('allTasks')} value="all" />
@@ -92,7 +128,7 @@ const TaskListScreen = ({ navigation }) => {
       {filteredTasks.length > 0 ? (
         <FlatList
           data={filteredTasks}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={item => item.id.toString()}
           renderItem={renderTask}
         />
       ) : (
@@ -110,63 +146,40 @@ const TaskListScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
+  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
   filterRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // Розташування filterBy та Picker в один рядок
+    justifyContent: 'space-between',
     marginBottom: 10,
   },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  picker: {
-    width: 150, // Визначаємо ширину Picker
-  },
+  label: { fontSize: 16, fontWeight: 'bold' },
+  picker: { width: 150 },
+
   taskItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 10,
+    paddingVertical: 8,
   },
-  expandButton: {
-    fontSize: 18, // Зменшення розміру шрифту
-    paddingRight: 10,
-  },
-  taskContent: {
-    flex: 1, 
-  },
-  taskTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  taskDescription: {
-    fontSize: 14,
-    color: 'gray',
-  },
-  taskCategory: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  deleteButton: {
-    padding: 5,
-  },
-  deleteText: {
-    color: 'red',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  noTasksText: {
-    textAlign: 'center',
-    marginTop: 20,
-    fontSize: 14,
-    color: 'gray',
-  },
+  expandButton: { fontSize: 18, paddingHorizontal: 8 },
+
+  taskContent: { flex: 1 },
+  taskTitle: { fontSize: 16, fontWeight: 'bold' },
+  taskTitleCompleted: { textDecorationLine: 'line-through', color: 'gray' },
+  taskDescription: { fontSize: 14, color: 'gray' },
+  taskCategory: { fontSize: 14, fontWeight: 'bold' },
+
+  completeButton: { paddingHorizontal: 8 },
+  completeText: { fontSize: 18, color: 'green' },
+
+  editButton: { paddingHorizontal: 8 },
+  editText: { fontSize: 18, color: '#555' },
+
+  deleteButton: { paddingHorizontal: 8 },
+  deleteText: { color: 'red', fontSize: 18, fontWeight: 'bold' },
+
+  noTasksText: { textAlign: 'center', marginTop: 20, fontSize: 14, color: 'gray' },
+
   addButton: {
     position: 'absolute',
     bottom: 20,
@@ -179,11 +192,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5,
   },
-  addButtonText: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
+  addButtonText: { color: 'white', fontSize: 24, fontWeight: 'bold' },
 });
 
 export default TaskListScreen;
