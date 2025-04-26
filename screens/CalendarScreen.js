@@ -4,7 +4,7 @@ import { Calendar, LocaleConfig } from 'react-native-calendars';
 import { useTranslation } from 'react-i18next';
 import { TasksContext } from '../context/TasksContext';
 
-// Локалізація календаря
+// Налаштування локалізації календаря для української мови
 LocaleConfig.locales['uk'] = {
   monthNames: [
     'Січень', 'Лютий', 'Березень', 'Квітень', 'Травень', 'Червень',
@@ -21,6 +21,7 @@ LocaleConfig.locales['uk'] = {
   today: 'Сьогодні'
 };
 
+// Налаштування локалізації календаря для англійської мови
 LocaleConfig.locales['en'] = {
   monthNames: [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -43,24 +44,37 @@ const CalendarScreen = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [locale, setLocale] = useState(i18n.language);
 
+  // При зміні мови оновлюємо локаль календаря
   useEffect(() => {
     LocaleConfig.defaultLocale = i18n.language === 'uk' ? 'uk' : 'en';
     setLocale(i18n.language);
   }, [i18n.language]);
 
-  // Фільтрація завдань на основі вибраної дати
-  const tasksForSelectedDate = tasks.filter((task) => task.date === selectedDate);
+  // Відмітки для календаря: вибрана дата + дати з нотатками
+  const markedDates = {
+    ...(selectedDate && {
+      [selectedDate]: { selected: true, selectedColor: 'blue' }
+    }),
+    ...tasks.reduce((acc, task) => {
+      const date = task.date;
+      acc[date] = { marked: true, dotColor: '#2196F3', ...(acc[date] || {}) };
+      return acc;
+    }, {})
+  };
+
+  // Фільтрація завдань за вибраною датою
+  const tasksForSelectedDate = tasks.filter(task => task.date === selectedDate);
 
   return (
     <View style={styles.container}>
-      {/* Календар у верхній частині */}
       <View style={styles.calendarContainer}>
         <Calendar
-          key={locale} 
-          onDayPress={(day) => setSelectedDate(day.dateString)}
-          markedDates={{
-            [selectedDate]: { selected: true, selectedColor: 'blue' }
-          }}
+          key={locale}               // Перерендер при зміні мови
+          onDayPress={day => setSelectedDate(day.dateString)} 
+          markedDates={markedDates}
+          // Налаштування: понеділок — перший день тижня
+          firstDay={1}               
+          // Тема відображення
           theme={{
             selectedDayBackgroundColor: 'blue',
             todayTextColor: 'red',
@@ -73,27 +87,27 @@ const CalendarScreen = () => {
         />
       </View>
 
-      {/* Список завдань */}
       <View style={styles.tasksContainer}>
         <Text style={styles.tasksHeader}>
-          {selectedDate ? `${t('notesOn')} ${selectedDate}` : t('selectDate')}
+          {selectedDate 
+            ? `${t('notesFor')} ${selectedDate}` 
+            : t('selectDate')}
         </Text>
         <FlatList
           data={tasksForSelectedDate}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={item => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.taskItem}>
               <Text style={styles.taskTitle}>{item.title}</Text>
-              {/* Виправлена помилка: якщо категорія відсутня, виводимо "Інше" */}
-              {item.category ? (
-                <Text style={styles.taskCategory}>{t(`category.${item.category}`)}</Text>
-              ) : (
-                <Text style={styles.taskCategory}>{t('category.other')}</Text>
-              )}
+              <Text style={styles.taskCategory}>
+                {t(`category.${item.category}`)}
+              </Text>
               {item.description ? <Text>{item.description}</Text> : null}
             </View>
           )}
-          ListEmptyComponent={<Text style={styles.noTasksText}>{t('noTasks')}</Text>}
+          ListEmptyComponent={
+            <Text style={styles.noTasksText}>{t('noTasks')}</Text>
+          }
         />
       </View>
     </View>
@@ -101,43 +115,41 @@ const CalendarScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
   calendarContainer: {
-    flex: 1,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: '#ddd'
   },
   tasksContainer: {
     flex: 1,
-    padding: 10,
+    padding: 10
   },
   tasksHeader: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 10
   },
   taskItem: {
-    padding: 10,
+    paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: '#eee'
   },
   taskTitle: {
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 16
   },
   taskCategory: {
     fontSize: 14,
     color: 'gray',
     fontStyle: 'italic',
+    marginBottom: 4
   },
   noTasksText: {
     textAlign: 'center',
     marginTop: 20,
     fontSize: 14,
-    color: 'gray',
-  },
+    color: 'gray'
+  }
 });
 
 export default CalendarScreen;
