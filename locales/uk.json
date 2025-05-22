@@ -31,6 +31,8 @@
     "deleteConfirmationMessage": "Ви впевнені, що хочете видалити це завдання?",
     "cancel": "Скасувати",
     "delete": "X",
+    "confirmDeleteTitle": "Видалення нотатки",
+    "confirmDeleteMessage": "Ви впевнені, що хочете видалити цю нотатку?",
     "changeLanguage": "Змінити мову",
     "userInfo": "FAQ",
     "error": "Помилка",

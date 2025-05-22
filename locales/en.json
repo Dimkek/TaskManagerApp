@@ -11,6 +11,8 @@
     "addNote": "Add Note",
     "settings": "Settings",
     "error": "Error",
+    "confirmDeleteTitle": "Confirm Delete Task",
+    "confirmDeleteMessage": "Are you sure you want to delete this task?",
     "titleRequired": "Title is required",
     "enableNotification": "Enable notifications",
     "selectLanguage": "Select Language",
