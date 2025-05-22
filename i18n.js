@@ -2,15 +2,14 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from './locales/en.json';
 import uk from './locales/uk.json';
-import 'intl-pluralrules'; // Полів для підтримки Intl.PluralRules
-
+import 'intl-pluralrules'; 
 i18n.use(initReactI18next).init({
   resources: {
     en: { translation: en },
     uk: { translation: uk },
   },
-  lng: 'en', // Мова за замовчуванням
-  fallbackLng: 'en',
+  lng: 'en', 
+  fallbackLng: 'en', 
   interpolation: {
     escapeValue: false,
   },

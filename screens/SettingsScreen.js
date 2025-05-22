@@ -12,20 +12,6 @@ const SettingsScreen = () => {
     i18n.changeLanguage(language);
   };
 
-  const openUserInfo = () => {
-    const url = 'https://duckduckgo.com'; // Заглушка для "User Information"
-    Linking.openURL(url).catch((err) =>
-      console.error('Failed to open URL: ', err)
-    );
-  };
-
-  const openTechnicalSupport = () => {
-    const url = 'https://support.example.com'; // Заглушка для техпідтримки
-    Linking.openURL(url).catch((err) =>
-      console.error('Failed to open URL: ', err)
-    );
-  };
-
   return (
     <View style={styles.container}>
       {/* Зміна мови */}
@@ -42,16 +28,6 @@ const SettingsScreen = () => {
           </Picker>
         </View>
       </View>
-
-      {/* User Information */}
-      <TouchableOpacity style={styles.row} onPress={openUserInfo}>
-        <Text style={styles.label}>{t('userInfo')}</Text>
-      </TouchableOpacity>
-
-      {/* Technical Support */}
-      <TouchableOpacity style={styles.row} onPress={openTechnicalSupport}>
-        <Text style={styles.label}>{t('technicalSupport')}</Text>
-      </TouchableOpacity>
     </View>
   );
 };

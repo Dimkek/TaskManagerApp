@@ -17,6 +17,7 @@
     "titlePlaceholder": "Заголовок",
     "descriptionPlaceholder": "Опис",
     "selectedDate": "Обрана дата",
+    "notesFor": "Нотатки на",
     "selectedTime": "Обрана година",
     "notesOn": "Нотатки на",
     "noTasks": "Немає завдань",
@@ -32,7 +33,10 @@
     "delete": "X",
     "changeLanguage": "Змінити мову",
     "userInfo": "FAQ",
+    "error": "Помилка",
+    "titleRequired": "Заголовок обов'язковий",
     "technicalSupport": "Технічна підтримка", 
+    "enableNotification": "Увімкнути сповіщення",
     "calendar": {
       "monthNames": ["Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"],
       "monthNamesShort": ["Січ", "Лют", "Бер", "Кві", "Тра", "Чер", "Лип", "Сер", "Вер", "Жов", "Лис", "Гру"],

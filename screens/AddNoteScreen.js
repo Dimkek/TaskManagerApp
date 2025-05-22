@@ -9,7 +9,7 @@ import * as Notifications from 'expo-notifications';
 
 const AddNoteScreen = ({ route, navigation }) => {
   const { addTask, updateTask } = useContext(TasksContext);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -108,7 +108,7 @@ const AddNoteScreen = ({ route, navigation }) => {
       {/* Вибір дати */}
       <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateTimeButton}>
         <Text style={styles.dateTimeText}>
-          {t('selectedDate')}: {date.toDateString()}
+          {t('selectedDate')}: {new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'long', year: 'numeric' }).format(date)}
         </Text>
       </TouchableOpacity>
       {showDatePicker && (
