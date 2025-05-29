@@ -22,6 +22,17 @@ const AddNoteScreen = ({ route, navigation }) => {
   const [enableNotification, setEnableNotification] = useState(false); // Перемикач для сповіщень
 
   useEffect(() => {
+    const requestPermissions = async () => {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(t('error'), t('notificationPermissionDenied'));
+      }
+    };
+
+    requestPermissions();
+  }, []);
+
+  useEffect(() => {
     if (route.params?.task) {
       const { task } = route.params;
       setTitle(task.title);
@@ -54,25 +65,21 @@ const AddNoteScreen = ({ route, navigation }) => {
     } else {
       addTask(newTask);
       if (enableNotification) {
-        schedulePushNotification(title, date, time);
+        const trigger = new Date(date);
+        trigger.setHours(time.getHours());
+        trigger.setMinutes(time.getMinutes());
+
+        Notifications.scheduleNotificationAsync({
+          content: {
+            title: t('reminderTitle'),
+            body: t('reminderBody', { title }),
+          },
+          trigger,
+        });
       }
     }
     navigation.goBack();
   };
-
-  async function schedulePushNotification(title, date, time) {
-    const trigger = new Date(date);
-    trigger.setHours(time.getHours());
-    trigger.setMinutes(time.getMinutes());
-
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: t('reminderTitle'),
-        body: `${t('reminderBody')} ${title}`,
-      },
-      trigger,
-    });
-  }
 
   return (
     <View style={styles.container}>
