@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, FlatList, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Picker } from '@react-native-picker/picker';
@@ -14,12 +14,10 @@ const categoryColors = {
 
 const TaskListScreen = ({ navigation }) => {
   const { t } = useTranslation();
-  // Додаємо updateTask для позначення виконаних завдань
   const { tasks, removeTask, updateTask } = useContext(TasksContext);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [expandedTasks, setExpandedTasks] = useState({});
 
-  // Функція підтвердження видалення
   const confirmDelete = (taskId) => {
     Alert.alert(
       t('confirmDeleteTitle'),
@@ -31,22 +29,19 @@ const TaskListScreen = ({ navigation }) => {
     );
   };
 
-  // Перехід на екран редагування
+  // Тепер передаємо тільки task, без updateTask!
   const editTask = (task) => {
-    navigation.navigate('AddNote', { task });
+    navigation.navigate('EditNote', { task });
   };
 
-  // Перемикання розгортання опису
   const toggleExpand = (taskId) => {
     setExpandedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }));
   };
 
-  // Позначити задачу виконаною
   const toggleComplete = (task) => {
     updateTask({ ...task, completed: !task.completed });
   };
 
-  // Фільтрація та сортування: спочатку невиконані, потім виконані
   const filteredTasks = (selectedCategory === 'all'
     ? tasks
     : tasks.filter(task => task.category === selectedCategory)
@@ -67,7 +62,7 @@ const TaskListScreen = ({ navigation }) => {
           <Text
             style={[
               styles.taskTitle,
-              item.completed && styles.taskTitleCompleted  // Якщо виконано, накреслити
+              item.completed && styles.taskTitleCompleted
             ]}
           >
             {item.title}
@@ -80,7 +75,6 @@ const TaskListScreen = ({ navigation }) => {
           </Text>
         </View>
 
-        {/* Кнопка позначити виконаною */}
         <TouchableOpacity
           style={styles.completeButton}
           onPress={() => toggleComplete(item)}
@@ -88,7 +82,6 @@ const TaskListScreen = ({ navigation }) => {
           <Text style={styles.completeText}>✔</Text>
         </TouchableOpacity>
 
-        {/* Кнопка редагувати */}
         <TouchableOpacity
           style={styles.editButton}
           onPress={() => editTask(item)}
@@ -96,7 +89,6 @@ const TaskListScreen = ({ navigation }) => {
           <Text style={styles.editText}>✎</Text>
         </TouchableOpacity>
 
-        {/* Кнопка видалити */}
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={() => confirmDelete(item.id)}
