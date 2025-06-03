@@ -22,9 +22,11 @@ const AddNoteScreen = ({ route, navigation }) => {
   const [enableNotification, setEnableNotification] = useState(false); // Перемикач для сповіщень
 
   useEffect(() => {
+    // Запит дозволів для сповіщень
     const requestPermissions = async () => {
       const { status } = await Notifications.requestPermissionsAsync();
       if (status !== 'granted') {
+        // Відображення повідомлення, якщо дозволи не надані
         Alert.alert(t('error'), t('notificationPermissionDenied'));
       }
     };
@@ -33,26 +35,29 @@ const AddNoteScreen = ({ route, navigation }) => {
   }, []);
 
   useEffect(() => {
+    // Якщо передано завдання через route params, заповнюємо поля
     if (route.params?.task) {
       const { task } = route.params;
-      setTitle(task.title);
-      setDescription(task.description);
-      setCategory(task.category);
-      setTaskId(task.id);
+      setTitle(task.title); // Встановлюємо заголовок
+      setDescription(task.description); // Встановлюємо опис
+      setCategory(task.category); // Встановлюємо категорію
+      setTaskId(task.id); // Встановлюємо ID завдання
     }
-  }, [route.params?.task]);
+  }, [route.params?.task]); // Виконується при зміні route.params.task
 
   const saveNote = () => {
+    // Перевірка, чи введено заголовок
     if (!title.trim()) {
-      Alert.alert(t('error'), t('titleRequired'));
+      Alert.alert(t('error'), t('titleRequired')); // Відображення помилки, якщо заголовок порожній
       return;
     }
 
     const formattedDate = date.toISOString().split('T')[0];
     const formattedTime = time.toTimeString().split(':').slice(0, 2).join(':');
 
+    // Створення нового об'єкта завдання
     const newTask = {
-      id: taskId || Date.now(),
+      id: taskId || Date.now(), // Використовуємо існуючий ID або генеруємо новий
       title,
       description,
       date: formattedDate,
@@ -64,6 +69,7 @@ const AddNoteScreen = ({ route, navigation }) => {
       updateTask(newTask);
     } else {
       addTask(newTask);
+      // Планування сповіщення, якщо увімкнено
       if (enableNotification) {
         const trigger = new Date(date);
         trigger.setHours(time.getHours());
@@ -71,38 +77,40 @@ const AddNoteScreen = ({ route, navigation }) => {
 
         Notifications.scheduleNotificationAsync({
           content: {
-            title: t('reminderTitle'),
-            body: t('reminderBody', { title }),
+            title: t('reminderTitle'), // Заголовок сповіщення
+            body: t('reminderBody', { title }), // Тіло сповіщення
           },
-          trigger,
+          trigger, // Час сповіщення
         });
       }
     }
-    navigation.goBack();
+    navigation.goBack(); // Повернення на попередній екран
   };
 
   return (
     <View style={styles.container}>
+      {/* Поле вводу заголовка */}
       <TextInput
-        placeholder={t('titlePlaceholder')}
-        value={title}
-        onChangeText={setTitle}
+        placeholder={t('titlePlaceholder')} // Підказка для заголовка
+        value={title} // Значення заголовка
+        onChangeText={setTitle} // Оновлення заголовка
         style={styles.input}
       />
+      {/* Поле вводу опису */}
       <TextInput
-        placeholder={t('descriptionPlaceholder')}
-        value={description}
-        onChangeText={setDescription}
-        multiline={true}
-        numberOfLines={4}
+        placeholder={t('descriptionPlaceholder')} // Підказка для опису
+        value={description} // Значення опису
+        onChangeText={setDescription} // Оновлення опису
+        multiline={true} // Дозволяє кілька рядків
+        numberOfLines={4} // Кількість рядків
         style={[styles.input, styles.textArea]}
       />
 
       {/* Вибір категорії */}
       <Text style={styles.label}>{t('selectCategory')}:</Text>
       <Picker
-        selectedValue={category}
-        onValueChange={(itemValue) => setCategory(itemValue)}
+        selectedValue={category} // Вибрана категорія
+        onValueChange={(itemValue) => setCategory(itemValue)} // Оновлення категорії
         style={styles.picker}
       >
         <Picker.Item label={t('category.work')} value="work" />
@@ -120,13 +128,13 @@ const AddNoteScreen = ({ route, navigation }) => {
       </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker
-          value={date}
-          mode="date"
+          value={date} // Поточна дата
+          mode="date" // Режим вибору дати
           display="default"
           onChange={(event, selectedDate) => {
-            setShowDatePicker(false);
+            setShowDatePicker(false); // Закриваємо вибір дати
             if (selectedDate) {
-              setDate(selectedDate);
+              setDate(selectedDate); // Оновлюємо дату
             }
           }}
         />
@@ -140,23 +148,24 @@ const AddNoteScreen = ({ route, navigation }) => {
       </TouchableOpacity>
       {showTimePicker && (
         <DateTimePicker
-          value={time}
-          mode="time"
+          value={time} // Поточний час
+          mode="time" // Режим вибору часу
           display="default"
           onChange={(event, selectedTime) => {
-            setShowTimePicker(false);
+            setShowTimePicker(false); // Закриваємо вибір часу
             if (selectedTime) {
-              setTime(selectedTime);
+              setTime(selectedTime); // Оновлюємо час
             }
           }}
         />
       )}
 
+      {/* Перемикач для увімкнення.вимкнення сповіщень */}
       <View style={styles.switchContainer}>
         <Text>{t('enableNotification')}</Text>
         <Switch
-          value={enableNotification}
-          onValueChange={setEnableNotification}
+          value={enableNotification} // Значення перемикача
+          onValueChange={setEnableNotification} // Оновлення стану перемикача
         />
       </View>
 

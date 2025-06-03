@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Picker } from '@react-native-picker/picker';
 import { TasksContext } from '../context/TasksContext';
 
+// Об'єкт для визначення кольорів категорій
 const categoryColors = {
   work: '#A7C7E7',
   shopping: '#B5EAD7',
@@ -14,17 +15,21 @@ const categoryColors = {
 
 const TaskListScreen = ({ navigation }) => {
   const { t } = useTranslation();
+  // Отримуємо завдання, функцію видалення та оновлення з контексту
   const { tasks, removeTask, updateTask } = useContext(TasksContext);
+  // Стан для вибраної категорії (за замовчуванням "all")
   const [selectedCategory, setSelectedCategory] = useState('all');
+  // Стан для розгорнутих завдань (зберігає ID завдань, які розгорнуті)
   const [expandedTasks, setExpandedTasks] = useState({});
 
+  // Функція підтвердження видалення завдання
   const confirmDelete = (taskId) => {
     Alert.alert(
-      t('confirmDeleteTitle'),
-      t('confirmDeleteMessage'),
+      t('confirmDeleteTitle'), // Заголовок підтвердження
+      t('confirmDeleteMessage'), // Повідомлення підтвердження
       [
-        { text: t('cancel'), style: 'cancel' },
-        { text: t('delete'), onPress: () => removeTask(taskId), style: 'destructive' }
+        { text: t('cancel'), style: 'cancel' }, //Кнопка скасування
+        { text: t('delete'), onPress: () => removeTask(taskId), style: 'destructive' } // Кнопка видалення
       ]
     );
   };
@@ -34,10 +39,12 @@ const TaskListScreen = ({ navigation }) => {
     navigation.navigate('EditNote', { task });
   };
 
+  // Перемикання розгортання опису
   const toggleExpand = (taskId) => {
     setExpandedTasks(prev => ({ ...prev, [taskId]: !prev[taskId] }));
   };
 
+  // Позначити задачу виконаною
   const toggleComplete = (task) => {
     updateTask({ ...task, completed: !task.completed });
   };
@@ -52,6 +59,7 @@ const TaskListScreen = ({ navigation }) => {
 
     return (
       <View style={styles.taskItem}>
+        {/* Кнопка розгортання/згортання опису */}
         <TouchableOpacity onPress={() => toggleExpand(item.id)}>
           <Text style={styles.expandButton}>
             {expandedTasks[item.id] ? '⌵' : '>'}
@@ -70,18 +78,20 @@ const TaskListScreen = ({ navigation }) => {
           {expandedTasks[item.id] && (
             <Text style={styles.taskDescription}>{item.description}</Text>
           )}
+          {/* Відображення категорії завдання за кольором */}
           <Text style={[styles.taskCategory, { color: categoryColors[item.category] }]}>
             ({t(`category.${item.category}`)})
           </Text>
         </View>
-
+          {/* Кнопка позначити завдання виконаним */}
         <TouchableOpacity
           style={styles.completeButton}
           onPress={() => toggleComplete(item)}
         >
           <Text style={styles.completeText}>✔</Text>
         </TouchableOpacity>
-
+          
+          {/* Кнопка редагування завдання */}
         <TouchableOpacity
           style={styles.editButton}
           onPress={() => editTask(item)}
@@ -89,6 +99,7 @@ const TaskListScreen = ({ navigation }) => {
           <Text style={styles.editText}>✎</Text>
         </TouchableOpacity>
 
+          {/* Кнопка видалення завдання */}
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={() => confirmDelete(item.id)}
@@ -101,6 +112,7 @@ const TaskListScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* Фільтр завдань за категорією */}
       <View style={styles.filterRow}>
         <Text style={styles.label}>{t('filterBy')}:</Text>
         <Picker
@@ -117,16 +129,18 @@ const TaskListScreen = ({ navigation }) => {
         </Picker>
       </View>
 
+      {/* Відобрадення списку завданб або повідомлення про їх відсутність */}
       {filteredTasks.length > 0 ? (
         <FlatList
-          data={filteredTasks}
-          keyExtractor={item => item.id.toString()}
-          renderItem={renderTask}
+          data={filteredTasks} // Дані для списку
+          keyExtractor={item => item.id.toString()} // Унікальний ключ для кожного елемента
+          renderItem={renderTask} // Функція для рендерингу завдання
         />
       ) : (
-        <Text style={styles.noTasksText}>{t('noTasks')}</Text>
+        <Text style={styles.noTasksText}>{t('noTasks')}</Text> // Повідомлення, якщо завдань немає
       )}
 
+      {/* Кнопка додавання нового завдання */}
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate('AddNote')}
