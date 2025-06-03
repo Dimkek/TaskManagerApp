@@ -29,7 +29,7 @@ const TaskListScreen = ({ navigation }) => {
     );
   };
 
-  // Тепер передаємо тільки task, без updateTask!
+  // Тепер передаємо тільки task
   const editTask = (task) => {
     navigation.navigate('EditNote', { task });
   };

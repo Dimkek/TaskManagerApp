@@ -91,7 +91,7 @@ const CalendarScreen = () => {
         <Text style={styles.tasksHeader}>
           {selectedDate 
             ? `${t('notesFor')} ${selectedDate}` 
-            : t('selectDate')}
+            : t('selectDate')} 
         </Text>
         <FlatList
           data={tasksForSelectedDate}
