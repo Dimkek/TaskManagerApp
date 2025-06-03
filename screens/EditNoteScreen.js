@@ -3,11 +3,12 @@ import { View, TextInput, Button, StyleSheet, Text, Switch, TouchableOpacity, Al
 import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Notifications from 'expo-notifications';
+import { useTranslation } from 'react-i18next';
 import { TasksContext } from '../context/TasksContext'; // Імпортуємо контекст завдань
 
-// Компонент для редагування нотатки
 const EditNoteScreen = ({ route, navigation }) => {
   const { updateTask } = useContext(TasksContext); // Отримуємо функцію оновлення завдань із контексту
+  const { t, i18n } = useTranslation(); // Використовуємо локалізацію
   const { task } = route.params; // Отримуємо переданий параметр із даними нотатки
 
   // Стани для збереження даних форми
@@ -20,10 +21,10 @@ const EditNoteScreen = ({ route, navigation }) => {
   const [showTimePicker, setShowTimePicker] = useState(false); // Стан для відображення вибору часу
   const [enableNotification, setEnableNotification] = useState(task.enableNotification || false); // Стан для перемикача нагадувань
 
-  // Перевірка на порожній заголовок перед збереженням
+  // Функція для збереження змін
   const handleSave = async () => {
     if (!title.trim()) {
-      Alert.alert('Помилка', 'Заголовок не може бути порожнім!'); // Перевірка на порожній заголовок
+      Alert.alert(t('error'), t('titleRequired')); // Використовуємо ключі локалізації для помилки
       return;
     }
 
@@ -52,8 +53,8 @@ const EditNoteScreen = ({ route, navigation }) => {
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: 'Нагадування', // Заголовок сповіщення
-          body: `Нотатка: ${title}`, // Тіло сповіщення
+          title: t('reminderTitle'), // Заголовок сповіщення
+          body: t('reminderBody', { title }), // Тіло сповіщення
         },
         trigger, // Час сповіщення
       });
@@ -66,36 +67,39 @@ const EditNoteScreen = ({ route, navigation }) => {
     <View style={styles.container}>
       {/* Поле вводу для заголовка */}
       <TextInput
-        style={styles.input}
+        placeholder={t('titlePlaceholder')} // Підказка для заголовка
         value={title}
         onChangeText={setTitle}
-        placeholder="Заголовок"
+        style={styles.input}
       />
       {/* Поле вводу для опису */}
       <TextInput
-        style={[styles.input, styles.textArea]}
+        placeholder={t('descriptionPlaceholder')} // Підказка для опису
         value={description}
         onChangeText={setDescription}
-        placeholder="Опис"
-        multiline
+        multiline={true}
+        numberOfLines={4}
+        style={[styles.input, styles.textArea]}
       />
+
       {/* Вибір категорії */}
-      <Text style={styles.label}>Категорія:</Text>
+      <Text style={styles.label}>{t('selectCategory')}:</Text>
       <Picker
         selectedValue={category}
-        onValueChange={setCategory}
+        onValueChange={(itemValue) => setCategory(itemValue)}
         style={styles.picker}
       >
-        <Picker.Item label="Робота" value="work" />
-        <Picker.Item label="Покупки" value="shopping" />
-        <Picker.Item label="Дім" value="home" />
-        <Picker.Item label="Проєкти" value="projects" />
-        <Picker.Item label="Інше" value="other" />
+        <Picker.Item label={t('category.work')} value="work" />
+        <Picker.Item label={t('category.shopping')} value="shopping" />
+        <Picker.Item label={t('category.home')} value="home" />
+        <Picker.Item label={t('category.projects')} value="projects" />
+        <Picker.Item label={t('category.other')} value="other" />
       </Picker>
+
       {/* Вибір дати */}
       <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateTimeButton}>
         <Text style={styles.dateTimeText}>
-          Дата: {date.toLocaleDateString()} {/* Відображення вибраної дати */}
+          {t('selectedDate')}: {new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'long', year: 'numeric' }).format(date)}
         </Text>
       </TouchableOpacity>
       {showDatePicker && (
@@ -104,15 +108,18 @@ const EditNoteScreen = ({ route, navigation }) => {
           mode="date"
           display="default"
           onChange={(event, selectedDate) => {
-            setShowDatePicker(false); // Закриваємо вибір дати
-            if (selectedDate) setDate(selectedDate); // Оновлюємо стан дати
+            setShowDatePicker(false);
+            if (selectedDate) {
+              setDate(selectedDate);
+            }
           }}
         />
       )}
+
       {/* Вибір часу */}
       <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.dateTimeButton}>
         <Text style={styles.dateTimeText}>
-          Час: {time.toTimeString().split(':').slice(0, 2).join(':')} {/* Відображення вибраного часу */}
+          {t('selectedTime')}: {time.toTimeString().split(':').slice(0, 2).join(':')}
         </Text>
       </TouchableOpacity>
       {showTimePicker && (
@@ -121,34 +128,66 @@ const EditNoteScreen = ({ route, navigation }) => {
           mode="time"
           display="default"
           onChange={(event, selectedTime) => {
-            setShowTimePicker(false); // Закриваємо вибір часу
-            if (selectedTime) setTime(selectedTime); // Оновлюємо стан часу
+            setShowTimePicker(false);
+            if (selectedTime) {
+              setTime(selectedTime);
+            }
           }}
         />
       )}
+
       {/* Перемикач для увімкнення/вимкнення нагадувань */}
       <View style={styles.switchContainer}>
-        <Text>Увімкнути нагадування</Text>
+        <Text>{t('enableNotification')}</Text>
         <Switch
           value={enableNotification}
-          onValueChange={setEnableNotification} // Оновлюємо стан перемикача
+          onValueChange={setEnableNotification}
         />
       </View>
+
       {/* Кнопка для збереження змін */}
-      <Button title="Зберегти" onPress={handleSave} />
+      <Button title={t('saveNote')} onPress={handleSave} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' }, // Основний контейнер
-  input: { height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10, padding: 10 }, // Поле вводу
-  textArea: { height: 80 }, // Поле вводу для опису
-  label: { marginTop: 10, fontSize: 16, fontWeight: 'bold' }, // Стиль для тексту "Категорія"
-  picker: { height: 50, marginBottom: 20 }, // Стиль для вибору категорії
-  switchContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 10 }, // Контейнер для перемикача
-  dateTimeButton: { marginVertical: 10 }, // Кнопка для вибору дати/часу
-  dateTimeText: { fontSize: 16 }, // Текст для відображення дати/часу
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    padding: 10,
+  },
+  textArea: {
+    height: 80,
+  },
+  label: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  picker: {
+    height: 50,
+    marginBottom: 20,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
+  dateTimeButton: {
+    marginVertical: 10,
+  },
+  dateTimeText: {
+    fontSize: 16,
+  },
 });
 
 export default EditNoteScreen;
