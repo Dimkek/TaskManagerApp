@@ -42,12 +42,12 @@ const CalendarScreen = () => {
   const { t, i18n } = useTranslation();
   const { tasks } = useContext(TasksContext);
   const [selectedDate, setSelectedDate] = useState('');
-  const [locale, setLocale] = useState(i18n.language);
+  const [localeKey, setLocaleKey] = useState(0); // Стан для примусового перерендеру
 
   // При зміні мови оновлюємо локаль календаря
   useEffect(() => {
     LocaleConfig.defaultLocale = i18n.language === 'uk' ? 'uk' : 'en';
-    setLocale(i18n.language);
+    setLocaleKey(prevKey => prevKey + 1); // Оновлюємо ключ для примусового перерендеру
   }, [i18n.language]);
 
   // Відмітки для календаря: вибрана дата + дати з нотатками
@@ -69,12 +69,10 @@ const CalendarScreen = () => {
     <View style={styles.container}>
       <View style={styles.calendarContainer}>
         <Calendar
-          key={locale}               // Перерендер при зміні мови
+          key={localeKey}               // Примусовий перерендер при зміні мови
           onDayPress={day => setSelectedDate(day.dateString)} 
           markedDates={markedDates}
-          // Налаштування: понеділок — перший день тижня
-          firstDay={1}               
-          // Тема відображення
+          firstDay={1}                  // Понеділок — перший день тижня
           theme={{
             selectedDayBackgroundColor: 'blue',
             todayTextColor: 'red',
